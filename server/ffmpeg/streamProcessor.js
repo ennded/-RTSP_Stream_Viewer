@@ -1,6 +1,11 @@
 const ffmpeg = require("fluent-ffmpeg");
 const { PassThrough } = require("stream");
+const ffmpegStatic = require("ffmpeg-static");
 
+// Set FFmpeg path
+ffmpeg.setFfmpegPath(ffmpegStatic);
+
+// Active streams map
 const activeStreams = new Map();
 
 const startFFmpegStream = (io, streamId, rtspUrl) => {
@@ -13,8 +18,13 @@ const startFFmpegStream = (io, streamId, rtspUrl) => {
   const mjpegStream = new PassThrough();
   let buffer = Buffer.alloc(0);
 
+  // Format URL for Windows if needed
+  const formattedUrl =
+    process.platform === "win32" ? rtspUrl.replace(/\\/g, "/") : rtspUrl;
+
   // FFmpeg command setup
-  const command = ffmpeg(rtspUrl)
+  const command = ffmpeg()
+    .input(formattedUrl)
     .inputOptions([
       "-rtsp_transport",
       "tcp",

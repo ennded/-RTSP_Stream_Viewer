@@ -12,8 +12,13 @@ exports.addStream = (io) => async (req, res) => {
     const newStream = new Stream({ url });
     await newStream.save();
 
-    // Start FFmpeg process
-    startFFmpegStream(io, newStream._id.toString(), url);
+    try {
+      startFFmpegStream(io, newStream._id.toString(), url);
+    } catch (ffmpegError) {
+      console.error("FFmpeg startup error:", ffmpegError);
+      await Stream.findByIdAndDelete(newStream._id);
+      throw new Error("Failed to start stream processing");
+    }
 
     res.status(201).json(newStream);
   } catch (err) {
