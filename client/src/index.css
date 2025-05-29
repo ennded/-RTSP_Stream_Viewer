@@ -1,6 +1,8 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* client/src/index.css */
+
+/* Tailwind v4 – use imports instead of @tailwind directives */
+@import "tailwindcss/preflight";
+@import "tailwindcss/utilities";
 
 body {
   margin: 0;

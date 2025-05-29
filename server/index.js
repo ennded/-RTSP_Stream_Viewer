@@ -12,7 +12,10 @@ const io = socketIo(server, {
   cors: {
     origin: process.env.CLIENT_URL || "http://localhost:3000",
     methods: ["GET", "POST"],
+    credentials: true,
   },
+  transports: ["websocket", "polling"], // Add this line
+  allowEIO3: true, // Add this for Socket.IO v2 compatibility
 });
 
 // MongoDB connection
@@ -22,7 +25,14 @@ mongoose
   .catch((err) => console.error("MongoDB connection error:", err));
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    credentials: true,
+  })
+);
+// app.options("/*", cors());
+
 app.use(express.json());
 
 // Routes
