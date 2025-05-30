@@ -1,7 +1,7 @@
 // src/index.js
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "./index.css"; // Keep this line
+import "./styles.css"; // Changed from index.css
 import App from "./App";
 
 // Remove this line:

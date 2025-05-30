@@ -45,19 +45,16 @@ const StreamGrid = () => {
       <AddStreamForm onSubmit={handleAddStream} />
 
       {loading ? (
-        <div className="text-center py-8">Loading streams...</div>
+        <div className="text-center py-8 text-gray-400">Loading streams...</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+        <div className="stream-grid">
           {streams.map((stream) => (
-            <div key={stream._id} className="relative">
-              <StreamPlayer streamId={stream._id} url={stream.url} />
-              <button
-                onClick={() => handleDelete(stream._id)}
-                className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg"
-                title="Delete stream"
-              >
-                ×
-              </button>
+            <div key={stream._id}>
+              <StreamPlayer
+                streamId={stream._id}
+                url={stream.url}
+                onDelete={() => handleDelete(stream._id)}
+              />
             </div>
           ))}
         </div>

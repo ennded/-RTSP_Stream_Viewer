@@ -1,8 +1,14 @@
-// client/tailwind.config.js
 module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        gray: {
+          800: "#1f2937",
+          900: "#111827",
+        },
+      },
+    },
   },
   plugins: [],
 };
