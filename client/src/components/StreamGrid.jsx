@@ -6,6 +6,7 @@ import { getStreams, addStream, deleteStream } from "../services/api";
 const StreamGrid = () => {
   const [streams, setStreams] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetchStreams();
@@ -16,7 +17,7 @@ const StreamGrid = () => {
       const data = await getStreams();
       setStreams(data);
     } catch (err) {
-      console.error("Failed to load streams:", err);
+      setError("Failed to load streams");
     } finally {
       setLoading(false);
     }
@@ -27,7 +28,7 @@ const StreamGrid = () => {
       const newStream = await addStream(url);
       setStreams([...streams, newStream]);
     } catch (err) {
-      alert(`Error: ${err.message}`);
+      setError(err.message);
     }
   };
 
@@ -36,26 +37,27 @@ const StreamGrid = () => {
       await deleteStream(id);
       setStreams(streams.filter((stream) => stream._id !== id));
     } catch (err) {
-      console.error("Failed to delete stream:", err);
+      setError("Failed to delete stream");
     }
   };
 
   return (
-    <div>
+    <div className="stream-grid-container">
       <AddStreamForm onSubmit={handleAddStream} />
 
+      {error && <div className="error-message">{error}</div>}
+
       {loading ? (
-        <div className="text-center py-8 text-gray-400">Loading streams...</div>
+        <div className="loading-message">Loading streams...</div>
       ) : (
         <div className="stream-grid">
           {streams.map((stream) => (
-            <div key={stream._id}>
-              <StreamPlayer
-                streamId={stream._id}
-                url={stream.url}
-                onDelete={() => handleDelete(stream._id)}
-              />
-            </div>
+            <StreamPlayer
+              key={stream._id}
+              streamId={stream._id}
+              url={stream.url}
+              onDelete={() => handleDelete(stream._id)}
+            />
           ))}
         </div>
       )}

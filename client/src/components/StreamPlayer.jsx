@@ -5,6 +5,7 @@ const StreamPlayer = ({ streamId, url, onDelete }) => {
   const [isPlaying, setIsPlaying] = useState(true);
   const [error, setError] = useState("");
   const [status, setStatus] = useState("connecting");
+  const [isDeleting, setIsDeleting] = useState(false);
   const imgRef = useRef(null);
 
   useEffect(() => {
@@ -22,68 +23,62 @@ const StreamPlayer = ({ streamId, url, onDelete }) => {
       }
     };
 
-    // Set up all listeners
-    socket.on("connect_error", handleConnectError);
-    socket.on("video-frame", handleFrame);
-    socket.on("stream-error", handleStreamError);
-
-    joinStreamRoom(streamId);
-    setStatus("connecting");
-
-    const handleError = (data) => {
+    const handleStreamError = (data) => {
       if (data.streamId === streamId) {
         setError(data.message);
         setStatus("error");
       }
     };
 
+    const handleStreamDeleted = (data) => {
+      if (data.streamId === streamId) {
+        onDelete();
+      }
+    };
+
+    socket.on("connect_error", handleConnectError);
     socket.on("video-frame", handleFrame);
-    socket.on("stream-error", handleError);
+    socket.on("stream-error", handleStreamError);
+    socket.on("stream-deleted", handleStreamDeleted);
+
+    joinStreamRoom(streamId);
+    setStatus("connecting");
 
     return () => {
-      leaveStreamRoom(streamId);
+      socket.off("connect_error", handleConnectError);
       socket.off("video-frame", handleFrame);
-      socket.off("stream-error", handleError);
+      socket.on("stream-error", handleStreamError);
+      socket.off("stream-deleted", handleStreamDeleted);
+      leaveStreamRoom(streamId);
     };
-  }, [streamId, isPlaying]);
+  }, [streamId, isPlaying, onDelete]);
 
-  const getStatusDotClass = () => {
-    switch (status) {
-      case "live":
-        return "status-dot live";
-      case "error":
-        return "status-dot error";
-      default:
-        return "status-dot connecting";
-    }
-  };
-
-  const getStatusText = () => {
-    switch (status) {
-      case "live":
-        return "LIVE";
-      case "error":
-        return "ERROR";
-      default:
-        return "CONNECTING...";
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await onDelete();
+    } catch (err) {
+      setError("Failed to delete stream");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
   return (
     <div className="stream-player">
+      {/* Status bar */}
       <div className="stream-status">
         <div className="status-indicator">
-          <div className={getStatusDotClass()}></div>
-          <span className="status-text">{getStatusText()}</span>
+          <div className={`status-dot ${status}`}></div>
+          <span className="status-text">{status.toUpperCase()}</span>
         </div>
         <div className="timestamp">{new Date().toLocaleString()}</div>
       </div>
 
+      {/* Video container */}
       <div className="video-container">
         {error ? (
-          <div className="flex flex-col items-center justify-center h-full p-4">
-            <div className="error-message">{error}</div>
-          </div>
+          <div className="error-display">{error}</div>
         ) : (
           <img
             ref={imgRef}
@@ -91,49 +86,24 @@ const StreamPlayer = ({ streamId, url, onDelete }) => {
             className={`video-image ${isPlaying ? "" : "hidden"}`}
           />
         )}
-
-        {!isPlaying && !error && (
-          <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center">
-            <div className="text-white text-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-12 w-12 mx-auto opacity-80"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                />
-              </svg>
-              <span className="mt-1 block">Paused</span>
-            </div>
-          </div>
-        )}
       </div>
 
+      {/* Controls */}
       <div className="controls">
-        <div className="control-buttons">
-          <button
-            onClick={() => setIsPlaying(!isPlaying)}
-            className={`control-button ${
-              isPlaying ? "play-button" : "play-button"
-            }`}
-            title={isPlaying ? "Pause" : "Play"}
-          >
-            {isPlaying ? "Pause" : "Play"}
-          </button>
-          <button
-            onClick={onDelete}
-            className="control-button delete-button"
-            title="Delete stream"
-          >
-            Delete
-          </button>
-        </div>
+        <button
+          onClick={() => setIsPlaying(!isPlaying)}
+          className={`control-button ${isPlaying ? "pause" : "play"}`}
+          disabled={isDeleting}
+        >
+          {isPlaying ? "Pause" : "Play"}
+        </button>
+        <button
+          onClick={handleDelete}
+          className="control-button delete"
+          disabled={isDeleting}
+        >
+          {isDeleting ? "Deleting..." : "Delete"}
+        </button>
         <div className="stream-url" title={url}>
           {url}
         </div>

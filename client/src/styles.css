@@ -295,3 +295,19 @@ body {
   height: 100%;
   object-fit: cover;
 }
+
+/* Add to your styles.css */
+.stream-grid-container {
+  width: 100%;
+  max-width: 1200px; /* or your preferred max width */
+  margin: 0 auto;
+  padding: 0 1rem; /* prevents content touching edges */
+  overflow: hidden; /* contains children */
+}
+
+.stream-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+  width: 100%;
+}

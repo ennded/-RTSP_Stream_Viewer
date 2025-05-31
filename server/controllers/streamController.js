@@ -38,17 +38,19 @@ exports.getStreams = async (req, res) => {
 exports.deleteStream = (io) => async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Stop FFmpeg process
+    stopFFmpegStream(id);
+
     const stream = await Stream.findByIdAndDelete(id);
 
     if (!stream) {
       return res.status(404).json({ error: "Stream not found" });
     }
 
-    // Stop FFmpeg process
-    stopFFmpegStream(id);
     io.to(id).emit("stream-stopped", { streamId: id });
 
-    res.json({ message: "Stream deleted" });
+    res.json({ message: "Stream deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

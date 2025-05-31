@@ -7,30 +7,25 @@ ffmpeg.setFfmpegPath(ffmpegStatic);
 const activeStreams = new Map();
 
 const startFFmpegStream = (io, streamId, rtspUrl) => {
-  console.log(`Starting stream ${streamId} with URL: ${rtspUrl}`); // Debug log
-
-  if (activeStreams.has(streamId)) return;
+  if (activeStreams.has(streamId)) {
+    console.log(`Stream ${streamId} already exists`);
+    return;
+  }
 
   const mjpegStream = new PassThrough();
   let buffer = Buffer.alloc(0);
 
-  const formattedUrl =
-    process.platform === "win32" ? rtspUrl.replace(/\\/g, "/") : rtspUrl;
-
-  // FIX 1: Remove stimeout option and add TCP timeout alternative
   const command = ffmpeg()
-    .input(formattedUrl)
-    .inputOptions([
-      "-rtsp_transport",
-      "tcp",
-      "-timeout",
-      "5000000", // Use standard timeout option
-    ])
+    .input(rtspUrl)
+    .inputOptions(["-rtsp_transport", "tcp", "-timeout", "5000000"])
     .outputOptions(["-q:v", "2", "-f", "mjpeg"])
     .on("start", (cmd) => console.log(`FFmpeg started: ${cmd}`))
     .on("error", (err) => {
       console.error(`FFmpeg error: ${err.message}`);
-      io.to(streamId).emit("stream-error", { streamId, message: err.message });
+      io.to(streamId).emit("stream-error", {
+        streamId,
+        message: err.message,
+      });
       stopFFmpegStream(streamId);
     })
     .on("end", () => {
@@ -55,7 +50,6 @@ const startFFmpegStream = (io, streamId, rtspUrl) => {
     }
   });
 
-  // FIX 2: Store the actual child process
   activeStreams.set(streamId, {
     command: command,
     childProcess: command.ffmpegProc,
@@ -64,11 +58,15 @@ const startFFmpegStream = (io, streamId, rtspUrl) => {
 
 const stopFFmpegStream = (streamId) => {
   if (activeStreams.has(streamId)) {
-    const { childProcess } = activeStreams.get(streamId);
+    const { command, childProcess } = activeStreams.get(streamId);
 
-    // FIX 3: Properly kill the process
-    if (childProcess && !childProcess.killed) {
-      process.kill(childProcess.pid, "SIGKILL");
+    try {
+      if (childProcess && !childProcess.killed) {
+        childProcess.kill("SIGKILL");
+      }
+      command.kill("SIGKILL");
+    } catch (err) {
+      console.error(`Error stopping stream ${streamId}:`, err);
     }
 
     activeStreams.delete(streamId);
