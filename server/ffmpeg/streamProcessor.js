@@ -7,6 +7,8 @@ ffmpeg.setFfmpegPath(ffmpegStatic);
 const activeStreams = new Map();
 
 const startFFmpegStream = (io, streamId, rtspUrl) => {
+  console.log(`Starting stream ${streamId} with URL: ${rtspUrl}`); // Debug log
+
   if (activeStreams.has(streamId)) return;
 
   const mjpegStream = new PassThrough();

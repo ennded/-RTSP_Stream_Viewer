@@ -8,13 +8,20 @@ const StreamPlayer = ({ streamId, url, onDelete }) => {
   const imgRef = useRef(null);
 
   useEffect(() => {
-    joinStreamRoom(streamId);
-    setStatus("connecting");
+    const handleConnectError = (err) => {
+      console.error("Connection error:", err);
+      setError("Connection failed. Retrying...");
+      setStatus("error");
+    };
+
+    // joinStreamRoom(streamId);
+    // setStatus("connecting");
 
     const handleFrame = (data) => {
       if (data.streamId === streamId && imgRef.current && isPlaying) {
         imgRef.current.src = data.frame;
         setStatus("live");
+        setError("");
       }
     };
 

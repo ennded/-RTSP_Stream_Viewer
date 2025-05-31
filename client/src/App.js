@@ -1,5 +1,6 @@
 import React from "react";
 import StreamGrid from "./components/StreamGrid";
+import DebugPanel from "./components/DebugPanel";
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
       <main className="container">
         <StreamGrid />
       </main>
+      <DebugPanel />
     </div>
   );
 }

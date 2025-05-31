@@ -1,13 +1,15 @@
 import { io } from "socket.io-client";
 
-const SOCKET_URL = process.env.REACT_APP_SOCKET_URL;
+const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || "http://localhost:3001";
 
 export const socket = io(SOCKET_URL, {
-  autoConnect: true,
+  withCredentials: true,
+  transports: ["websocket", "polling"],
   reconnection: true,
   reconnectionAttempts: 10,
-  reconnectionDelay: 3000,
-  transports: ["websocket"],
+  reconnectionDelay: 1000,
+  timeout: 20000,
+  forceNew: true,
 });
 
 export const joinStreamRoom = (streamId) => {
