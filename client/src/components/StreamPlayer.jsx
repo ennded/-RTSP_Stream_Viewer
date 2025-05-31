@@ -25,6 +25,11 @@ const StreamPlayer = ({ streamId, url, onDelete }) => {
       }
     };
 
+    // Set up all listeners
+    socket.on("connect_error", handleConnectError);
+    socket.on("video-frame", handleFrame);
+    socket.on("stream-error", handleStreamError);
+
     const handleError = (data) => {
       if (data.streamId === streamId) {
         setError(data.message);
