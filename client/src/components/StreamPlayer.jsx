@@ -14,9 +14,6 @@ const StreamPlayer = ({ streamId, url, onDelete }) => {
       setStatus("error");
     };
 
-    // joinStreamRoom(streamId);
-    // setStatus("connecting");
-
     const handleFrame = (data) => {
       if (data.streamId === streamId && imgRef.current && isPlaying) {
         imgRef.current.src = data.frame;
@@ -29,6 +26,9 @@ const StreamPlayer = ({ streamId, url, onDelete }) => {
     socket.on("connect_error", handleConnectError);
     socket.on("video-frame", handleFrame);
     socket.on("stream-error", handleStreamError);
+
+    joinStreamRoom(streamId);
+    setStatus("connecting");
 
     const handleError = (data) => {
       if (data.streamId === streamId) {
