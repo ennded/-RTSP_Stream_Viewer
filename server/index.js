@@ -11,11 +11,27 @@ const server = http.createServer(app);
 
 // Use CLIENT_URL from env or fallback
 const CLIENT_URL = process.env.CLIENT_URL || "http://192.168.1.108:3000";
+console.log("CORS allowed origin:", CLIENT_URL);
 
 // Setup Socket.IO with proper CORS config matching express
+
+const allowedOrigins = [
+  "http://localhost:3000",
+  process.env.CLIENT_URL, // your frontend URL from env
+  "https://rtsp-stream-viewer-theta.vercel.app",
+].filter(Boolean);
+
 const io = socketIo(server, {
   cors: {
-    origin: CLIENT_URL,
+    origin: function (origin, callback) {
+      // allow requests with no origin (like curl/postman)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
     methods: ["GET", "POST"],
     credentials: true,
   },

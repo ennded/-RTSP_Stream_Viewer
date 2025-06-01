@@ -1,6 +1,6 @@
 const ffmpeg = require("fluent-ffmpeg");
 const { PassThrough } = require("stream");
-const ffmpegStatic = require("ffmpeg-static");
+const ffmpegStatic = "ffmpeg";
 
 ffmpeg.setFfmpegPath(ffmpegStatic);
 const activeStreams = new Map();
