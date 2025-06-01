@@ -8,45 +8,43 @@ const streamRoutes = require("./routes/streamRoutes");
 
 const app = express();
 const server = http.createServer(app);
+
+// Use CLIENT_URL from env or fallback
+const CLIENT_URL = process.env.CLIENT_URL || "http://192.168.1.108:3000";
+
+// Setup Socket.IO with proper CORS config matching express
 const io = socketIo(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: CLIENT_URL,
     methods: ["GET", "POST"],
     credentials: true,
   },
-  transports: ["websocket", "polling"], // Add this line
-  allowEIO3: true, // Add this for Socket.IO v2 compatibility
+  transports: ["websocket", "polling"],
+  allowEIO3: true,
 });
 
-// MongoDB connection
+// Connect to MongoDB
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
-// Middleware
+// Use CORS middleware with exact same origin as Socket.IO
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: CLIENT_URL,
     credentials: true,
   })
 );
-app.use((req, res, next) => {
-  res.header(
-    "Access-Control-Allow-Origin",
-    process.env.CLIENT_URL || "http://localhost:3000"
-  );
-  res.header("Access-Control-Allow-Credentials", "true");
-  next();
-});
-// app.options("/*", cors());
+
+// No need to manually set headers, cors middleware handles it
 
 app.use(express.json());
 
 // Routes
 app.use("/api/streams", streamRoutes(io));
 
-// Socket.IO handling
+// Socket.IO event handling
 io.on("connection", (socket) => {
   console.log(`Client connected: ${socket.id}`);
 
