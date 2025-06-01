@@ -1,3 +1,4 @@
+// src/components/VideoPlayer.tsx
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -36,29 +37,21 @@ export default function VideoPlayer({
     }
   }, [currentFrame]);
 
-  const handleImageError = () => {
-    setIsLoading(false);
-  };
-
-  const handleImageLoad = () => {
-    setIsLoading(false);
-  };
-
   return (
     <div
       className="relative w-full h-full bg-black"
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}
     >
-      {/* Video Frame */}
+      {/* Video Frame or Error/Loading UI */}
       {currentFrame ? (
         <img
           ref={imgRef}
           src={currentFrame}
           alt="Live stream"
           className="w-full h-full object-contain"
-          onError={handleImageError}
-          onLoad={handleImageLoad}
+          onLoad={() => setIsLoading(false)}
+          onError={() => setIsLoading(false)}
         />
       ) : (
         <div className="flex items-center justify-center h-full">
@@ -91,7 +84,7 @@ export default function VideoPlayer({
         </div>
       )}
 
-      {/* Stream info overlay */}
+      {/* Stream Info Overlay */}
       {showControls && (
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
           <div className="text-white text-sm truncate" title={url}>

@@ -8,7 +8,7 @@ import { addStream } from "../lib/api";
 interface AddStreamModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onStreamAdded: (stream: any) => void;
+  onStreamAdded: (stream: { name: string; url: string }) => void;
 }
 
 export default function AddStreamModal({
