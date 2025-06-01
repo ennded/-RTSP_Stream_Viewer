@@ -4,11 +4,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FiX, FiCamera } from "react-icons/fi";
 import { useState } from "react";
 import { addStream } from "../lib/api";
+import { Stream } from "../types/stream"; // ✅ Import the Stream type
 
 interface AddStreamModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onStreamAdded: (stream: { name: string; url: string }) => void;
+  onStreamAdded: (stream: Stream) => void; // ✅ Expect full Stream object
 }
 
 export default function AddStreamModal({
@@ -31,12 +32,12 @@ export default function AddStreamModal({
     setError("");
 
     try {
-      const newStream = await addStream(url);
-      onStreamAdded(newStream);
+      const newStream: Stream = await addStream(url); // ✅ Typed correctly
+      onStreamAdded(newStream); // ✅ Matches callback type
       setUrl("");
       onClose();
     } catch (err) {
-      setError("Failed to add stream. Please check the URL.");
+      setError("Failed to add stream.");
     } finally {
       setIsLoading(false);
     }
