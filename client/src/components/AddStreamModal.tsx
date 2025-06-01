@@ -37,7 +37,7 @@ export default function AddStreamModal({
       setUrl("");
       onClose();
     } catch (err) {
-      setError("Failed to add stream.");
+      console.error(err);
     } finally {
       setIsLoading(false);
     }

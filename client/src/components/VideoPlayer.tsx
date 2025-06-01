@@ -1,4 +1,5 @@
 // src/components/VideoPlayer.tsx
+// eslint-disable-next-line @next/next/no-img-element
 "use client";
 
 import { useEffect, useRef, useState } from "react";
